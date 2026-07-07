@@ -212,10 +212,8 @@ extension AttributedLabel {
         private var links: [Link] = []
         private var linkElements: [LinkElement] = []
 
-        /// The accessibility label derived from the displayed text. Recomputed only when the text
-        /// changes (see the `previousAttributedText != attributedText` guard in `update`), and cached
-        /// here so an `accessibilityLabel` override change can be applied on every update without
-        /// re-running the expensive text derivation.
+        /// Text-derived label, cached so an `accessibilityLabel` override can be re-applied on every
+        /// update without re-running the expensive derivation. Recomputed only when the text changes.
         private var derivedAccessibilityLabel: String?
 
         private var textRectOffset: UIOffset = .zero {
@@ -313,8 +311,6 @@ extension AttributedLabel {
 
                 if previousAttributedText != attributedText {
                     links = attributedLinks(in: model.attributedText) + detectedDataLinks(in: model.attributedText)
-                    // Cache the (expensive, link-enumerating) text-derived label so we can re-apply
-                    // the override below on every update without recomputing it.
                     derivedAccessibilityLabel = accessibilityLabel(
                         with: links,
                         in: model.attributedText.string,
@@ -325,9 +321,8 @@ extension AttributedLabel {
                         .compactMap { .init(sourceLabel: attributedText, link: $0) }
                 }
 
-                // Apply the override on every update so a change to `model.accessibilityLabel` takes
-                // effect even when the text is unchanged. `nil` falls back to the cached derived label
-                // (current behavior); `""` explicitly suppresses the spoken label.
+                // Applied every update (outside the text-change guard) so an override change takes
+                // effect even when the text is unchanged. `nil` falls back to the derived label.
                 accessibilityLabel = model.accessibilityLabel ?? derivedAccessibilityLabel
 
                 if let shadow = model.shadow {
