@@ -80,11 +80,14 @@ public struct AttributedLabel: Element, Hashable {
     /// Overrides the automatically-derived accessibility label.
     ///
     /// When `nil` (the default), the label is derived from the displayed text — current behavior.
-    /// Provide a string to override it, or `""` to suppress the spoken label entirely. Suppression
-    /// is useful when the text is surfaced through `accessibilityValue` / `accessibilityHint`
-    /// instead, so the content is not announced twice (e.g. when this label is merged into a
-    /// combined accessibility element).
+    /// Provide a string to override it, or `suppressedAccessibilityLabel` (`""`) to suppress the
+    /// spoken label entirely. Suppression is useful when the text is surfaced through
+    /// `accessibilityValue` / `accessibilityHint` instead, so the content is not announced twice
+    /// (e.g. when this label is merged into a combined accessibility element).
     public var accessibilityLabel: String?
+
+    /// Assign to `accessibilityLabel` to suppress the spoken label entirely (see that property).
+    public static let suppressedAccessibilityLabel = ""
 
     /// A localized string that represents the current value of the accessibility element.
     ///

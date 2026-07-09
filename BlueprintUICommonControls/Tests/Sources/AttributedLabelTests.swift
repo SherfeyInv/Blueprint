@@ -115,12 +115,14 @@ class AttributedLabelTests: XCTestCase {
         XCTAssertEqual(labelView.accessibilityLabel, "Custom")
     }
 
-    func test_accessibilityLabel_suppressed() {
+    // Load-bearing: guards the undocumented UIKit behavior that `""`-suppression relies on.
+    func test_accessibilityLabel_suppressed_guardsUIKitEmptyStringBehavior() {
         // An empty string suppresses the spoken label entirely: the backing view reports "",
         // *not* the displayed text. (UILabel returns an explicitly-set empty string verbatim,
-        // rather than falling back to its text the way it does for `nil`.)
+        // rather than falling back to its text the way it does for `nil`.) If a future OS changed
+        // this fallback, `""`-suppression would silently break — hence this test.
         let label = AttributedLabel(attributedText: NSAttributedString(string: "Hello, World!")) {
-            $0.accessibilityLabel = ""
+            $0.accessibilityLabel = AttributedLabel.suppressedAccessibilityLabel
         }
 
         let labelView = AttributedLabel.LabelView()
@@ -143,7 +145,7 @@ class AttributedLabelTests: XCTestCase {
         labelView.update(model: label, text: label.displayableAttributedText, environment: .empty, isMeasuring: false)
         XCTAssertEqual(labelView.accessibilityLabel, "Custom")
 
-        label.accessibilityLabel = ""
+        label.accessibilityLabel = AttributedLabel.suppressedAccessibilityLabel
         labelView.update(model: label, text: label.displayableAttributedText, environment: .empty, isMeasuring: false)
         XCTAssertEqual(labelView.accessibilityLabel, "")
 
@@ -158,7 +160,7 @@ class AttributedLabelTests: XCTestCase {
         // merged into a composite accessibility element — the empty label is filtered out, so the
         // content isn't announced twice.
         let label = AttributedLabel(attributedText: NSAttributedString(string: "Displayed text")) {
-            $0.accessibilityLabel = ""
+            $0.accessibilityLabel = AttributedLabel.suppressedAccessibilityLabel
             $0.accessibilityValue = "X"
         }
 
